@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  ai:
+    build: ./ai
+    environment:
+      - AI_MODEL=advanced-model
+
+  backend:
+    build: ./backend
+    environment:
+      - DB_URL=localhost:5432
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8501:8501"
