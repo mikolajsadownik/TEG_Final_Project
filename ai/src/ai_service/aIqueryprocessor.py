@@ -1,28 +1,29 @@
 import os
 from openai import OpenAI
 import sys
+import json
 from ai_errors import BadAiApiRes, BadUserPrompt, AiAgentError
+import ai_prompts as aiP
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from services.query_pinecone_with_gpt import query_pinecone, generate_response
+import json
+import re
 
 
 
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 code_list = [
-    "Kodeks cywilny","Kodeks postępowania cywilnego","Kodeks karny","Kodeks postępowania karnego","Kodeks pracy","Kodeks spółek handlowych","Kodeks rodzinny i opiekuńczy","Kodeks postępowania administracyjnego","Kodeks wykroczeń"
+    "Kodeks_cywilny","Kodeks postępowania cywilnego","Kodeks karny","Kodeks postępowania karnego","Kodeks pracy","Kodeks spółek handlowych","Kodeks rodzinny i opiekuńczy","Kodeks postępowania administracyjnego","Kodeks wykroczeń"
 ]
+
+key_words_path="key_words.json"
+
+
 
 
 def cheack_if_good_prompt(user_prompt):
-    system_prompt = (
-        f"""Jesteś doświadczonym prawnikiem, który ocenia, czy dana wypowiedź użytkownika może wskazywać na sytuację związaną z potrzebą pomocy prawnej lub rady prawnika.
-        Twoim zadaniem jest odpowiedzieć tylko i wyłącznie:
-        - `True` — jeśli wypowiedź użytkownika w jakikolwiek sposób wskazuje na możliwe zagadnienie prawne, np. naruszenie prawa, wykroczenie, spór cywilny, problem z umową, odpowiedzialność prawną, prawo pracy, rodzinne, administracyjne lub inne kwestie regulowane prawem,
-        - `False` — tylko jeśli wypowiedź jest całkowicie neutralna, nie dotyczy w żadnym aspekcie prawa ani odpowiedzialności prawnej.
-        Uwzględnij wszelkie niuanse, nawet jeśli wypowiedź jest nieformalna, żartobliwa, wulgarna czy niepełna. Jeśli masz wątpliwość, odpowiedz `True`.
-        Oceń następującą wypowiedź:
-        **"{user_prompt}"**""")
+    system_prompt = aiP.prompy_cheack_if_good_prompt(user_prompt)
             
     response = client.chat.completions.create(
             model="gpt-3.5-turbo",
@@ -39,16 +40,7 @@ def cheack_if_good_prompt(user_prompt):
         raise BadAiApiRes(res)
 
 def refine_user_prompt(user_prompt):
-    system_prompt = (
-       f""" Jesteś prawnikiem specjalizującym się w prawie karnym.
-
-        Twoim zadaniem jest przekształcenie wypowiedzi użytkownika, która może być nieformalna, w precyzyjne i profesjonalne zapytanie prawne, które można użyć do przeszukiwania dokumentów prawnych.
-
-        WAŻNE: Zachowaj dokładny sens, intencję i kontekst oryginalnej wypowiedzi. Nie interpretuj, nie dodawaj własnych założeń ani rozszerzeń znaczenia. Przekształć wypowiedź jedynie na bardziej formalny i klarowny język prawniczy.
-
-        Oto wypowiedź użytkownika:
-        {user_prompt}"""
-    )
+    system_prompt = aiP.prompt_refine_user_prompt(user_prompt)
     try:
         valid_prompt=cheack_if_good_prompt(user_prompt)
     except BadAiApiRes as e:
@@ -77,21 +69,75 @@ def check_pinecone_context(user_prompt):
 
 
 def define_legal_code(user_prompt):
-    system_prompt = (
-        "Jesteś prawnikiem specjalizującym się w polskich kodeksach prawnych. "
-        "Na podstawie pytania użytkownika zdecyduj, który z poniższych kodeksów należy przeszukać. "
-        "Zwróć **tylko i wyłącznie** dokładną nazwę jednego z poniższych kodeksów, bez dodatkowych wyjaśnień.\n\n"
-        f"Lista kodeksów: {', '.join(code_list)}"
-    )
+    system_prompt = aiP.prompt_define_legal_code(user_prompt=user_prompt)
     ref_prompt=refine_user_prompt(user_prompt)
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": ref_prompt}
         ]
     )
     return response.choices[0].message.content
 
 
-print(check_pinecone_context("czy mogę nasiakać do automatu z jedzeniem"))
+
+def chunk_list(lst, n):
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
+        
+def create_key_words_from_querry(keywords,prompt):
+    matches = []
+    for batch in chunk_list(keywords, 100):
+        system_prompt = aiP.prompt_create_key_words_from_querry(batch=batch,prompt=prompt)
+        
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "system", "content": system_prompt}]
+        )
+        if not response.choices or not response.choices[0].message.content.strip():
+            print("Pusta odpowiedź od modelu")
+        else:
+            res=json.loads(response.choices[0].message.content)
+
+            for r in res:
+                if not r in matches and r in keywords:
+                    matches.append(r)
+    return matches
+
+
+
+def extract_json_from_text(text):
+    try:
+        json_text = re.search(r'\[.*\]', text, re.DOTALL).group(0)
+        return json.loads(json_text)
+    except Exception as e:
+        print("Błąd wyciągania JSON-a:", e)
+        print("Pełny tekst:", text)
+        return None
+
+def evaluate_keywords_against_query(prompt, keywords, model="gpt-3.5-turbo"):
+    keywords_json = json.dumps(keywords, ensure_ascii=False)
+
+    system_message = "Jesteś prawnikiem, który ocenia słowa kluczowe względem pytania użytkownika."
+    user_message = aiP.evaluate_keywords_against_query(prompt,keywords_json)
+
+    response = client.chat.completions.create(
+        model=model,
+        messages=[
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": user_message}
+        ]
+    )
+
+    text_response = response.choices[0].message.content
+    print("Odpowiedź modelu:", repr(text_response))  # do debugowania
+
+    result = extract_json_from_text(text_response)
+    if result is None:
+        return []
+
+    passed_keywords = [r["keyword"] for r in result if r.get("pasuje") is True]
+    return passed_keywords
+
+
+print(check_pinecone_context("Czy można palić marihuana w kościele"))
