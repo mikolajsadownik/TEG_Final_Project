@@ -11,20 +11,25 @@ import json
 import re
 import pandas as pd
 import numpy as np
+from basemodel import BaseModel
 
 
-class KeyWordMaker:
+# model do wytworzenia i sprawdzenia czy wytworzone słowa klucz są odpowiednie
+
+class KeyWordMaker(BaseModel):
 
        
-    def __init__(self,ai_model="gpt-3.5-turbo"):
-        self.model=ai_model
-        self.client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+    def __init__(self, key_words_path, ai_model="gpt-3.5-turbo"):
+        super().__init__(name="KeyWordMaker", model=ai_model)
+        self.keywords = pd.read_json(key_words_path)
         pass
 
+    
     def chunk_list(self,lst, n):
         for i in range(0, len(lst), n):
             yield lst[i:i + n]
-            
+
+
     def create_key_words_from_querry(self,keywords,prompt):
         matches = []
         for batch in self.chunk_list(keywords, 50):
@@ -45,7 +50,6 @@ class KeyWordMaker:
         return matches
 
 
-
     def extract_json_from_text(self,text):
         try:
             json_text = re.search(r'\[.*\]', text, re.DOTALL).group(0)
@@ -54,6 +58,7 @@ class KeyWordMaker:
             print("Błąd wyciągania JSON-a:", e)
             print("Pełny tekst:", text)
             return None
+
 
     def evaluate_keywords_against_query(self,prompt, keywords, model="gpt-3.5-turbo"):
         keywords_json = json.dumps(keywords, ensure_ascii=False)
@@ -80,7 +85,8 @@ class KeyWordMaker:
         return passed_keywords
 
 
-    def create_keywords_from_prompt(self,prompt, keywords):
-        new_keywords=self.create_key_words_from_querry(keywords,prompt)
+    def create_keywords_from_prompt(self,prompt):
+        new_keywords=self.create_key_words_from_querry(self.keywords,prompt)
         evkeywords=self.evaluate_keywords_against_query(new_keywords,prompt)
         return evkeywords
+    
