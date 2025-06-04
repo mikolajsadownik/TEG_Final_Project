@@ -34,3 +34,8 @@ def test_pinecone_existing_data(query_text, expected_text):
 if __name__ == "__main__":
     # Przetestuj istniejace dane z PDF (Art. 1, par. 1)
     test_pinecone_existing_data("Małżeństwo zostaje zawarte", "Małżeństwo zostaje zawarte, gdy mężczyzna i kobieta jednocześnie obecni złożą przed kierownikiem urzędu stanu cywilnego oświadczenia, że wstępują ze sobą w związek małżeński.")
+
+
+
+
+

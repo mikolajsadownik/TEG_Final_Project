@@ -2,27 +2,17 @@ import os
 import pinecone
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langchain.schema import SystemMessage, HumanMessage
 
 # Załaduj zmienne środowiskowe
 load_dotenv(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.env")))
 
-# Wyczyść stare zmienne środowiskowe (tylko po załadowaniu .env)
-os.environ.pop("PINECONE_API_KEY", None)
-os.environ.pop("PINECONE_ENVIRONMENT", None)
-os.environ.pop("OPENAI_API_KEY", None)
-os.environ.pop("PINECONE_INDEX_NAME", None)
-os.environ.pop("PINECONE_NAMESPACE", None)
-
-load_dotenv(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.env")))
-
-# Klucze API
-PINECONE_API_KEY = os.environ.pop("PINECONE_API_KEY", None)
-PINECONE_ENVIRONMENT = os.environ.pop("PINECONE_ENVIRONMENT", None)
-OPENAI_API_KEY = os.environ.pop("OPENAI_API_KEY", None)
-INDEX_NAME = os.environ.pop("PINECONE_INDEX_NAME", "sample-index")
-NAMESPACE = os.environ.pop("PINECONE_NAMESPACE", "default")
+PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
+PINECONE_ENVIRONMENT = os.getenv("PINECONE_ENVIRONMENT")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+INDEX_NAME = os.getenv("PINECONE_INDEX_NAME", "sample-index")
+NAMESPACE = os.getenv("PINECONE_NAMESPACE", "default")
 
 # Inicjalizacja Pinecone
 pc = pinecone.Pinecone(api_key=PINECONE_API_KEY)
@@ -39,7 +29,7 @@ index = pc.Index(INDEX_NAME)
 embedding_model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 
 # Inicjalizacja ChatGPT
-chat = ChatOpenAI(model_name="gpt-4", openai_api_key=OPENAI_API_KEY)
+chat = ChatOpenAI(model_name="gpt-3.5-turbo", openai_api_key=OPENAI_API_KEY)
 
 
 def query_pinecone(query_text):
@@ -82,5 +72,5 @@ def main():
         print("Przepraszam, nie znalazłem odpowiednich informacji w bazie danych.")
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
