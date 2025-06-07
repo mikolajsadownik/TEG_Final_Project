@@ -70,8 +70,6 @@ def download_pdf(url,output=output):
         print("Błąd pobierania", r.status_code)
 
 def extract_text_from_pdf_starting_from_paragraph(pdf_path, start_pattern=r'§\s*1'):
-    
-
     with pdfplumber.open(pdf_path) as pdf:
         full_text = ""
         for page in pdf.pages:
@@ -81,13 +79,14 @@ def extract_text_from_pdf_starting_from_paragraph(pdf_path, start_pattern=r'§\s
         return full_text.strip()
 
 
-def split_text(text, max_words_=300,chunk_overlap_=75):
+def split_text(text, max_words_=300,chunk_overlap_=50):
     splitter = RecursiveCharacterTextSplitter(
     chunk_size=max_words_,          
     chunk_overlap=chunk_overlap_,         
     separators=[r"\n\n", r"\n", r"Art\. ", r"§ "]      
 )
     chunks = splitter.split_text(text)
+    print(len(chunks))
     return chunks 
 
 def get_text_embeddings(text_chunks, eb_model=model):
@@ -97,21 +96,49 @@ def get_text_embeddings(text_chunks, eb_model=model):
 
 def batch_valid_json(prompt,prompt_keywords):
     embeded_chunks=[]
+    chunks=[]
     similaracts=search_similar_documents(prompt_keywords)
     valid_path_pdfs=get_valid_pdf_paths(similaracts,prompt)
-    print(valid_path_pdfs)
-    print("test")
+    print(len(valid_path_pdfs))
     for path in valid_path_pdfs:
     
         output_path=download_pdf(path)
-        print(output_path)
-        print("_________________________")
         pdf_text=extract_text_from_pdf_starting_from_paragraph(output_path)
-        chunks=split_text(pdf_text)
-        print(chunks)
-        embeded_chunk=get_text_embeddings(chunks)
+        chunk=split_text(pdf_text)
+        chunks.append(chunk)
+        embeded_chunk=get_text_embeddings(chunk)
+
         embeded_chunks.append(embeded_chunk)
+    return embeded_chunks,chunks
+
+def search_similar_pdf(prompt,batch_chunks,text_chunks,eb_model=model,top_k=10):
+    question_embedding = eb_model.encode([prompt])[0]
+
+    similarities = cosine_similarity([question_embedding], batch_chunks)[0]
+
+    top_indices = similarities.argsort()[-top_k:][::-1]
+
+    results = [(text_chunks[i], similarities[i]) for i in top_indices]
+    return results
+
+def json_context(prompt, keywords):
+    
+    embeded_chunks,chunks=batch_valid_json(prompt,keywords)
+    index=0
+    batch_ans=[]
+    for i in range(len(chunks)):
+        results = search_similar_pdf(prompt, embeded_chunks[i], chunks[i])
+
+        for i, (text, score) in enumerate(results):
+            ans={"text":text,"score":score}
+            batch_ans.append(ans)
+            print(f"Fragment #{index} (similarity: {score:.4f}):\n{text}\n{'-'*40}")
+            index=index+1
+    batch_ans_sorted = sorted(batch_ans, key=lambda x: x['score'], reverse=True)
+    return batch_ans_sorted
+
 prompt="Czy pracodawca może rozwiązać umowę o pracę bez wypowiedzenia z powodu nieusprawiedliwionej nieobecności pracownika?"
 toche=['prawo pracy', 'umowa o pracy', 'pracodawca', 'dyscyplina pracy', 'dyscyplinarne postępowanie', 'kodeks pracy']
 
-embeded_chunks=batch_valid_json(prompt,toche)
+prompt = "Czy pracodawca może rozwiązać umowę o pracę bez wypowiedzenia z powodu nieusprawiedliwionej nieobecności pracownika?"
+print(json_context(prompt,toche))
