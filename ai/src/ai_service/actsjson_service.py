@@ -137,8 +137,8 @@ def json_context(prompt, keywords):
     batch_ans_sorted = sorted(batch_ans, key=lambda x: x['score'], reverse=True)
     return batch_ans_sorted
 
-prompt="Czy pracodawca może rozwiązać umowę o pracę bez wypowiedzenia z powodu nieusprawiedliwionej nieobecności pracownika?"
-toche=['prawo pracy', 'umowa o pracy', 'pracodawca', 'dyscyplina pracy', 'dyscyplinarne postępowanie', 'kodeks pracy']
+# prompt="Czy pracodawca może rozwiązać umowę o pracę bez wypowiedzenia z powodu nieusprawiedliwionej nieobecności pracownika?"
+# toche=['prawo pracy', 'umowa o pracy', 'pracodawca', 'dyscyplina pracy', 'dyscyplinarne postępowanie', 'kodeks pracy']
 
-prompt = "Czy pracodawca może rozwiązać umowę o pracę bez wypowiedzenia z powodu nieusprawiedliwionej nieobecności pracownika?"
-print(json_context(prompt,toche))
+# prompt = "Czy pracodawca może rozwiązać umowę o pracę bez wypowiedzenia z powodu nieusprawiedliwionej nieobecności pracownika?"
+# print(json_context(prompt,toche))
