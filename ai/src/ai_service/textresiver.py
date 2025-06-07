@@ -11,12 +11,16 @@ import json
 import re
 import pandas as pd
 import numpy as np
-class TextResiver:
+from basemodel import BaseModel
+
+#model który pierwszy dostaje wiadmości i ją przetwarza
+
+class TextResiver(BaseModel):
         
-    def __init__(self,ai_model="gpt-3.5-turbo"):
-        self.model=ai_model
-        self.client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-        pass
+    def __init__(self, ai_model="gpt-3.5-turbo"):
+        super().__init__(name="TextReceiver", model=ai_model)
+        
+
 
     def cheack_if_good_prompt(self, user_prompt):
         system_prompt = aiP.prompy_cheack_if_good_prompt(user_prompt)
@@ -34,6 +38,7 @@ class TextResiver:
             return False
         else:
             raise BadAiApiRes(res)
+
 
     def refine_user_prompt(self,user_prompt):
         system_prompt = aiP.prompt_refine_user_prompt(user_prompt)
@@ -53,6 +58,7 @@ class TextResiver:
             return response.choices[0].message.content
         else: raise BadUserPrompt(user_prompt)
 
+
     def check_pinecone_context(self,user_prompt):
         try:
             ref_prompt = self.refine_user_prompt(user_prompt=user_prompt)
@@ -63,15 +69,15 @@ class TextResiver:
         return ans
 
 
-
     def define_legal_code(self,user_prompt):
         system_prompt = aiP.prompt_define_legal_code(user_prompt=user_prompt)
-        ref_prompt=self.refine_user_prompt(user_prompt)
+        ref_prompt=self.refine_user_prompt(system_prompt)
         response = self.client.chat.completions.create(
             model=self.model,
             messages=[
-                {"role": "system", "content": system_prompt},
+                {"role": "system", "content": ref_prompt},
             ]
         )
         return response.choices[0].message.content
+
 
