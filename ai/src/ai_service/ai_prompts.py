@@ -38,41 +38,74 @@ def prompt_define_legal_code(user_prompt):
 
 def prompt_create_key_words_from_querry(batch,prompt):
     system_prompt = f"""
-    Jesteś prawnikiem.
-
     Twoje zadanie:
-    Na podstawie zapytania:
-    \"{prompt}\"
 
-    Zwróć listę słów kluczowych z PODANEJ LISTY, które najlepiej pasują do zapytania. 
-    NIE WOLNO dodawać, modyfikować ani wymyślać własnych słów.
 
-    Zwróć wynik jako poprawną listę JSON, np.:
+    Użytkownik pyta:
+    **{prompt}**
+
+    Lista słów kluczowych do oceny:
+        **{batch}**
+
+    odpoiwadające słowa kluczowe
+
+    Zwróć **TYLKO** listę słów kluczowych w formacie JSON, **bez żadnych wyjaśnień, komentarzy, dodatkowych tekstów**.
+
+    Zasady oceny:
+    - Oceń rzeczywiste, logiczne i kontekstowe powiązanie z treścią zapytania.
+    - Potraktuj zapytanie poważnie i rozważ możliwe przepisy lub instytucje, które mogą mieć związek z opisaną sytuacją – również jeśli jest nietypowe, potoczne lub żartobliwe.
+    - Jeśli słowo kluczowe może być powiązane z prawem, regulacjami, przestępstwami lub organami państwowymi w danym kontekście dodaj go do listy.
+    - Nie uzasadniaj decyzji. Nie dodawaj nowych słów.
+
+    Zasady:
+    - Użyj wyłącznie słów z podanej listy — nie wymyślaj nowych.
+    - **Nie dodawaj żadnego tekstu przed ani po liście.**
+    - **Nie używaj Markdowna, takiego jak ``` lub ```json.**
+    - WYNIK MUSI BYĆ CZYSTYM JSONEM typu `list[str]`.
+    - Używaj **TYLKO** podwójnych cudzysłowów: ["hasło"]
+
+    Przykład prawidłowego wyniku:
     ["Agencja Bezpieczeństwa Wewnętrznego", "Afganistan"]
 
-    Wynik może zawierać wyłącznie elementy z tej listy:
-    ***{batch}***
+    
+
     """
 
     return system_prompt
 
 def evaluate_keywords_against_query(prompt,keywords_json):
     system_prompt=f"""
-    Twoje zadanie: oceń, czy każde z poniższych słów kluczowych pasuje do zapytania użytkownika.
+    Twoje zadanie:s
+    Na podstawie zapytania użytkownika i podanej listy słów kluczowych, oceń, które z nich mogą być powiązane z sytuacją opisaną w zapytaniu **z punktu widzenia prawa**.
 
-    Zapytanie użytkownika:
+
+    Użytkownik pyta:
     \"\"\"{prompt}\"\"\"
 
-    Słowa kluczowe do oceny:
-    {keywords_json}
 
-    Dla każdego słowa oceń, czy logicznie i tematycznie pasuje do zapytania użytkownika.
-    Zwróć wynik jako listę JSON, np.:
+    Lista słów kluczowych do oceny:
+    \"\"\"{keywords_json}\"\"\"
+
+    
+    Zasady oceny:
+    - Pytanie może być sformułowane potocznie lub niepoważnie, ale Twoja analiza ma być **poważna, prawna i instytucjonalna**.
+    - Oceń, czy dane słowo kluczowe może mieć **jakikolwiek związek z przepisami prawa, regulacjami, instytucjami państwowymi, wykroczeniami, lub przestępstwami** – **nawet pośredni**.
+    - Odpowiadaj tylko `true` albo `false` dla każdego słowa.
+    - Nie dodawaj nowych słów, nie tłumacz niczego, nie komentuj.
+    - Wybierz najważnijesze
+    Zwróć odpowiedź jako poprawny JSON:
     [
-    {{"keyword": "Biuro Ochrony Rządu", "pasuje": true}},
-    {{"keyword": "defekacja", "pasuje": false}}
+    {{ "keyword": "example", "pasuje": true }},
+    ...
     ]
 
-    Nie zmieniaj słów. Nie dodawaj nowych. Tylko oceniaj.
+    """
+    return system_prompt
+
+
+def prompt_cheack(title,prompt):
+    system_prompt=f"""
+    Twoje zadanie to stwierdzenie czy dany tytuł *{title}* pasuje do {prompt}
+    masz zwrócić tylko **True** lub **False**
     """
     return system_prompt

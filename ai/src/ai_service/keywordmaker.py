@@ -21,7 +21,8 @@ class KeyWordMaker(BaseModel):
        
     def __init__(self, key_words_path, ai_model="gpt-3.5-turbo"):
         super().__init__(name="KeyWordMaker", model=ai_model)
-        self.keywords = pd.read_json(key_words_path)
+        self.keywords = np.array(pd.read_json(key_words_path)[0])
+        print(self.keywords)
         pass
 
     
@@ -32,13 +33,16 @@ class KeyWordMaker(BaseModel):
 
     def create_key_words_from_querry(self,keywords,prompt):
         matches = []
-        for batch in self.chunk_list(keywords, 50):
-            system_prompt = aiP.prompt_create_key_words_from_querry(batch=batch,prompt=prompt)
-            
+        for batch in self.chunk_list(keywords, 150):
+            system_prompt = "Jesteś prawnikiem specjalizującym sie w doborze słów kluczowych pod daną sytuacje"
+            user_message = aiP.prompt_create_key_words_from_querry(batch=batch,prompt=prompt)
             response = self.client.chat.completions.create(
                 model="gpt-3.5-turbo",
-                messages=[{"role": "system", "content": system_prompt}]
+                messages=[{"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_message}]
+               
             )
+            print("RAW RESPONSE:", repr(response.choices[0].message.content))
             if not response.choices or not response.choices[0].message.content.strip():
                 print("Pusta odpowiedź od modelu")
             else:
@@ -47,6 +51,7 @@ class KeyWordMaker(BaseModel):
                 for r in res:
                     if not r in matches and r in keywords:
                         matches.append(r)
+        print(matches)
         return matches
 
 
@@ -63,7 +68,7 @@ class KeyWordMaker(BaseModel):
     def evaluate_keywords_against_query(self,prompt, keywords, model="gpt-3.5-turbo"):
         keywords_json = json.dumps(keywords, ensure_ascii=False)
 
-        system_message = "Jesteś prawnikiem, który ocenia słowa kluczowe względem pytania użytkownika."
+        system_message = "Jesteś specjalistą od prawa i regulacji. Twoim zadaniem jest ocena, czy dane słowo kluczowe może mieć zastosowanie w kontekście przepisów prawa (karnego, administracyjnego, sanitarnego itp.) względem danego zapytania – nawet jeśli zapytanie jest nietypowe."
         user_message = aiP.evaluate_keywords_against_query(prompt,keywords_json)
 
         response = self.client.chat.completions.create(
@@ -72,6 +77,7 @@ class KeyWordMaker(BaseModel):
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_message}
             ]
+          
         )
 
         text_response = response.choices[0].message.content
@@ -87,6 +93,6 @@ class KeyWordMaker(BaseModel):
 
     def create_keywords_from_prompt(self,prompt):
         new_keywords=self.create_key_words_from_querry(self.keywords,prompt)
-        evkeywords=self.evaluate_keywords_against_query(new_keywords,prompt)
+        evkeywords=self.evaluate_keywords_against_query(prompt,new_keywords)
         return evkeywords
     

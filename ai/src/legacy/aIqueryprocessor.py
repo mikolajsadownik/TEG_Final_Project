@@ -3,7 +3,7 @@ from openai import OpenAI
 import sys
 import json
 from ai_errors import BadAiApiRes, BadUserPrompt, AiAgentError
-import ai_prompts as aiP
+import ai.src.ai_service.ai_prompts as aiP
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from services.query_pinecone_with_gpt import query_pinecone, generate_response
@@ -19,7 +19,7 @@ code_list = [
 
 key_words_path=r"key_words.json"
 
-df_key=pd.read_json(key_words_path)
+df_key=pd.read_json(r"C:\Users\jarja\Desktop\Studia\teg\TEG_Final_Project\ai\src\ai_service\key_words.json")
 
 
 
