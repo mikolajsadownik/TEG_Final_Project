@@ -82,7 +82,7 @@ def split_text(text, max_words_=300,chunk_overlap_=50):
     splitter = RecursiveCharacterTextSplitter(
     chunk_size=max_words_,          
     chunk_overlap=chunk_overlap_,         
-    separators=[r"\n\n", r"\n", r"Art\. ", r"§ "]      
+    separators=[r"\n\n", r"\n", r"Art\. ", r"§ ", r" \d+\.",r"\d+\.\d+", r"[A-ZĄĆĘŁŃÓŚŹŻ]{2,}"]      
 )
     chunks = splitter.split_text(text)
     # print(len(chunks))
@@ -98,7 +98,7 @@ def batch_valid_json(prompt,prompt_keywords):
     chunks=[]
     similaracts=search_similar_documents(prompt_keywords)
     valid_path_pdfs=get_valid_pdf_paths(similaracts,prompt)
-    print(len(valid_path_pdfs))
+
     for path in valid_path_pdfs:
     
         output_path=download_pdf(path)
@@ -110,10 +110,10 @@ def batch_valid_json(prompt,prompt_keywords):
         embeded_chunks.append(embeded_chunk)
     return embeded_chunks,chunks
 
-def search_similar_pdf(prompt,batch_chunks,text_chunks,eb_model=model,top_k=10):
+def search_similar_pdf(prompt,batch_chunks,text_chunks,eb_model=model,top_k=5):
     question_embedding = eb_model.encode([prompt])[0]
-
-    similarities = cosine_similarity([question_embedding], batch_chunks)[0]
+    question=[question_embedding]
+    similarities = cosine_similarity(question, batch_chunks)[0]
 
     top_indices = similarities.argsort()[-top_k:][::-1]
 
@@ -134,10 +134,9 @@ def json_context(prompt, keywords):
             # print(f"Fragment #{index} (similarity: {score:.4f}):\n{text}\n{'-'*40}")
             index=index+1
     batch_ans_sorted = sorted(batch_ans, key=lambda x: x['score'], reverse=True)
+
     return batch_ans_sorted
 
-# prompt="Czy pracodawca może rozwiązać umowę o pracę bez wypowiedzenia z powodu nieusprawiedliwionej nieobecności pracownika?"
-# toche=['prawo pracy', 'umowa o pracy', 'pracodawca', 'dyscyplina pracy', 'dyscyplinarne postępowanie', 'kodeks pracy']
 
-# prompt = "Czy pracodawca może rozwiązać umowę o pracę bez wypowiedzenia z powodu nieusprawiedliwionej nieobecności pracownika?"
-# print(json_context(prompt,toche))
+
+    

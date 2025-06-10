@@ -73,26 +73,27 @@ class TextResiver(BaseModel):
 
     def check_pinecone_context(self,user_prompt):
         try:
-        
             ref_prompt = self.refine_user_prompt(user_prompt=user_prompt)
-        except AiAgentError as e: 
-            return e.args[0]
+            print(ref_prompt)
+        except AiAgentError as e:
+            raise BadUserPrompt(user_prompt)
         legal_code=self.define_legal_code(ref_prompt)
-        print(legal_code)
         legal_code_json=json.loads(legal_code)
+        all_ans=[]
         for code_map in legal_code_json["proposed_codes"]:
-            print(code_map)
             if code_map in self.CODE_MAP.keys():
                 code=self.CODE_MAP[code_map]
                 context = query_pinecone_via_namespace(code,ref_prompt)
                 ans = generate_response(context=context,user_question=ref_prompt)
-                print("----")
-                print(ans)
+                g={"code":code,
+                   "ans":ans}
+                all_ans.append(g)
+
         context = query_pinecone(ref_prompt)
         ans = generate_response(context=context,user_question=ref_prompt)
-        print("______")
-        print(ans)
-        return ans
+        g={"code":"basa", "ans":ans}
+        all_ans.append(g)
+        return all_ans,ref_prompt
 
 
     def define_legal_code(self,user_prompt):

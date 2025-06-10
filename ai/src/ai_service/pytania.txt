@@ -1,0 +1,5 @@
+"Czy mogę sprzedawać lemoniade w miescu publicznym",
+"Co grozi za kłusownictwo",
+"Czy moge zabrac czekoladę ze sklepu",
+"Czym jest polonez",
+"Czy według prawa muszę płacić podatek za ilość drzew na działce"

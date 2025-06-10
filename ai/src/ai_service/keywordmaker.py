@@ -22,7 +22,6 @@ class KeyWordMaker(BaseModel):
     def __init__(self, key_words_path, ai_model="gpt-3.5-turbo"):
         super().__init__(name="KeyWordMaker", model=ai_model)
         self.keywords = np.array(pd.read_json(key_words_path)[0])
-        print(self.keywords)
         pass
 
     
@@ -44,17 +43,19 @@ class KeyWordMaker(BaseModel):
             )
 
             try:
+
                 if not response.choices or not response.choices[0].message.content.strip():
                     print("Pusta odpowiedź od modelu")
                 else:
                     res=json.loads(response.choices[0].message.content)
+                    for r in res:
+                        if not r in matches and r in keywords:
+                            matches.append(r)
             except json.JSONDecodeError as e:
                 print(f"Błąd dekodowania JSON: {e}")
             
 
-                for r in res:
-                    if not r in matches and r in keywords:
-                        matches.append(r)
+           
         return matches
 
 
@@ -84,7 +85,7 @@ class KeyWordMaker(BaseModel):
         )
 
         text_response = response.choices[0].message.content
-        print("Odpowiedź modelu:", repr(text_response))  # do debugowania
+        # print("Odpowiedź modelu:", repr(text_response))  
 
         result = self.extract_json_from_text(text_response)
         if result is None:
