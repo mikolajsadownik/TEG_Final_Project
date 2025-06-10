@@ -1,7 +1,21 @@
 
 code_list = [
-    "Kodeks_cywilny","Kodeks postępowania cywilnego","Kodeks karny","Kodeks postępowania karnego","Kodeks pracy","Kodeks spółek handlowych","Kodeks rodzinny i opiekuńczy","Kodeks postępowania administracyjnego","Kodeks wykroczeń"
-]
+        "Kodeks cywilny",
+        "Kodeks karny",
+        "Kodeks postępowania cywilnego",
+        "Kodeks pracy",
+        "Kodeks spółek handlowych",
+        "Kodeks rodzinny i opiekuńczy",
+        "Kodeks postępowania karnego",
+        "Kodeks wykroczeń",
+        "Kodeks postępowania administracyjnego",
+        "Kodeks karny skarbowy",
+        "Kodeks wyborczy",
+        "Kodeks morski"
+    ]
+
+
+
 def prompy_cheack_if_good_prompt(user_prompt):
     system_prompt = (
         f"""Jesteś doświadczonym prawnikiem, który ocenia, czy dana wypowiedź użytkownika może wskazywać na sytuację związaną z potrzebą pomocy prawnej lub rady prawnika.
@@ -27,12 +41,23 @@ def prompt_refine_user_prompt(user_prompt):
     return system_prompt
 
 def prompt_define_legal_code(user_prompt):
+    code_list_str = ', '.join(code_list)
     system_prompt = (
-        "Jesteś prawnikiem specjalizującym się w polskich kodeksach prawnych. "
-        "Na podstawie pytania użytkownika zdecyduj, który z poniższych kodeksów należy przeszukać. "
-        "Zwróć **tylko i wyłącznie** dokładną nazwę jednego z poniższych kodeksów, bez dodatkowych wyjaśnień.\n\n"
-        f"Lista kodeksów: {', '.join(code_list)}"
-        f"Prompt użytkownika: {user_prompt}"
+    f"""Jesteś prawnikiem specjalizującym się w polskim prawie. Twoim zadaniem jest wskazanie, które z poniższych kodeksów prawnych należy przeanalizować w kontekście pytania użytkownika.
+
+        Zwróć odpowiedź **wyłącznie jako czysty JSON** w formacie:
+
+        {{"proposed_codes": ['nazwa1', 'nazwa2', 'nazwa3']}}
+
+        - Wybierz maksymalnie **trzy** najbardziej odpowiednie kodeksy z poniższej listy.
+        - **Nie dodawaj żadnego komentarza, opisu ani tłumaczenia** – odpowiedź ma być czystym JSON-em, bez dodatkowego tekstu.
+        - Jeśli dodasz jakikolwiek inny tekst poza JSON-em – odpowiedź zostanie uznana za nieprawidłową.
+        
+        **Lista dostępnych kodeksów:**  
+        {code_list_str}
+
+        **Pytanie użytkownika:**  
+        {user_prompt}"""
     )
     return system_prompt
 

@@ -29,21 +29,34 @@ index = pc.Index(INDEX_NAME)
 embedding_model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 
 # Inicjalizacja ChatGPT
-chat = ChatOpenAI(model_name="gpt-3.5-turbo", openai_api_key=OPENAI_API_KEY)
+chat = ChatOpenAI(temperature=0.55,model_name="gpt-3.5-turbo", openai_api_key=OPENAI_API_KEY)
 
 
 def query_pinecone(query_text):
     """Wykonaj zapytanie do Pinecone i zwróć najlepsze dopasowania."""
     query_embedding = embedding_model.encode([query_text])[0]
-    results = index.query(vector=query_embedding.tolist(), top_k=50, namespace=NAMESPACE, include_metadata=True)
+    results = index.query(vector=query_embedding.tolist(), top_k=10, namespace=NAMESPACE, include_metadata=True)
 
     if len(results['matches']) == 0:
-        print("❌ Nie znaleziono odpowiednich danych w bazie.")
+        print("Nie znaleziono odpowiednich danych w bazie.")
         return None
 
     # Łączenie wyników w jeden kontekst
     context = "\n".join([match['metadata']['text'] for match in results['matches']])
     return context
+
+def query_pinecone_via_namespace(namespace,query_text):
+    """Wykonaj zapytanie do Pinecone i zwróć najlepsze dopasowania."""
+    query_embedding = embedding_model.encode([query_text])[0]
+    results = index.query(vector=query_embedding.tolist(), top_k=10, namespace=namespace, include_metadata=True)
+    if len(results['matches']) == 0:
+        print("Nie znaleziono odpowiednich danych w bazie.")
+        return "Error: Nie znaleziono odpowiednich danych w bazie."
+
+    # Łączenie wyników w jeden kontekst
+    context = "\n".join([match['metadata']['text'] for match in results['matches']])
+    return context
+
 
 
 def generate_response(context, user_question):
@@ -62,15 +75,15 @@ def generate_response(context, user_question):
 
 
 def main():
-    user_question = "Jakie mamy kodeksy w polskim prawie"
+    user_question = "Czy mogę sprzedawać na ulicy swoje rzeczy?"
     context = query_pinecone(user_question)
 
     if context:
         response = generate_response(context, user_question)
-        print(f"\n🗣️ Odpowiedź GPT:\n{response}")
+        print(f"\n Odpowiedź GPT:\n{response}")
     else:
         print("Przepraszam, nie znalazłem odpowiednich informacji w bazie danych.")
 
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()

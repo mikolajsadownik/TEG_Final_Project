@@ -3,6 +3,5 @@ __pycache__/
 .env
 .DS_Store
 *.log
-data/
 acts_backup.json
 MOJtest/
