@@ -42,16 +42,19 @@ class KeyWordMaker(BaseModel):
                         {"role": "user", "content": user_message}]
                
             )
-            print("RAW RESPONSE:", repr(response.choices[0].message.content))
-            if not response.choices or not response.choices[0].message.content.strip():
-                print("Pusta odpowiedź od modelu")
-            else:
-                res=json.loads(response.choices[0].message.content)
+
+            try:
+                if not response.choices or not response.choices[0].message.content.strip():
+                    print("Pusta odpowiedź od modelu")
+                else:
+                    res=json.loads(response.choices[0].message.content)
+            except json.JSONDecodeError as e:
+                print(f"Błąd dekodowania JSON: {e}")
+            
 
                 for r in res:
                     if not r in matches and r in keywords:
                         matches.append(r)
-        print(matches)
         return matches
 
 

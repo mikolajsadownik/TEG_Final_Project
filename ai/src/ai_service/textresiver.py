@@ -67,7 +67,6 @@ class TextResiver(BaseModel):
                     {"role": "system", "content": system_prompt},
                 ]
             )
-            print(response.choices[0].message.content)
             return response.choices[0].message.content
         else: raise BadUserPrompt(user_prompt)
 
@@ -109,5 +108,5 @@ class TextResiver(BaseModel):
         return response.choices[0].message.content
 
 
-tr=TextResiver()
-odp=tr.check_pinecone_context("Co musze zrobić by dostać obywatelstwo polskie?")
+# tr=TextResiver()
+# odp=tr.check_pinecone_context("Co musze zrobić by dostać obywatelstwo polskie?")

@@ -78,7 +78,6 @@ def extract_text_from_pdf_starting_from_paragraph(pdf_path, start_pattern=r'§\s
                 full_text += text + "\n"
         return full_text.strip()
 
-
 def split_text(text, max_words_=300,chunk_overlap_=50):
     splitter = RecursiveCharacterTextSplitter(
     chunk_size=max_words_,          
@@ -86,7 +85,7 @@ def split_text(text, max_words_=300,chunk_overlap_=50):
     separators=[r"\n\n", r"\n", r"Art\. ", r"§ "]      
 )
     chunks = splitter.split_text(text)
-    print(len(chunks))
+    # print(len(chunks))
     return chunks 
 
 def get_text_embeddings(text_chunks, eb_model=model):
@@ -132,7 +131,7 @@ def json_context(prompt, keywords):
         for i, (text, score) in enumerate(results):
             ans={"text":text,"score":score}
             batch_ans.append(ans)
-            print(f"Fragment #{index} (similarity: {score:.4f}):\n{text}\n{'-'*40}")
+            # print(f"Fragment #{index} (similarity: {score:.4f}):\n{text}\n{'-'*40}")
             index=index+1
     batch_ans_sorted = sorted(batch_ans, key=lambda x: x['score'], reverse=True)
     return batch_ans_sorted
