@@ -21,7 +21,7 @@ class KeyWordMaker(BaseModel):
        
     def __init__(self, key_words_path, ai_model="gpt-3.5-turbo"):
         super().__init__(name="KeyWordMaker", model=ai_model)
-        self.keywords = np.array(pd.read_json(key_words_path)[0])
+        self.keywords = np.array(pd.read_json(key_words_path, encoding="cp1250")[0])
         pass
 
     
