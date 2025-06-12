@@ -10,6 +10,7 @@ import ai_service.ai_prompts as aiP
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 print(os.getcwd())
+load_dotenv()
 
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
