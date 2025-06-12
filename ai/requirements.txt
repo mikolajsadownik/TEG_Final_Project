@@ -1,3 +1,13 @@
-flask
-streamlit
+fastapi
+uvicorn
 python-dotenv
+
+openai
+sentence-transformers
+scikit-learn
+pdfplumber
+pandas
+numpy
+langchain-openai==0.2.0
+pinecone
+langchain-community

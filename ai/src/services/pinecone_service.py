@@ -73,6 +73,7 @@ def embed_and_upsert(chunks, namespace="default"):
 def main():
     documents = read_pdfs(PDF_DIRECTORY)
     chunks = split_documents(documents)
+    print(chunks)
     embed_and_upsert(chunks)
     print("Pinecone index updated successfully!")
 

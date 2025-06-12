@@ -1,14 +1,18 @@
-# ai/src/app.py
-import logging
-from services.service import run_ai_service
-import time
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from services.query_pinecone_with_gpt import query_pinecone, generate_response
 
-def main():
-    logging.basicConfig(level=logging.INFO)
-    logging.info("Starting AI service...")
-    run_ai_service()
-    while True:
-        time.sleep(1)
+app = FastAPI(title="TEG AI Service")
 
-if __name__ == "__main__":
-    main()
+class AskRequest(BaseModel):
+    question: str
+
+@app.post("/ask")
+async def ask(req: AskRequest):
+    try:
+        ctx  = query_pinecone(req.question)
+        ans  = generate_response(ctx, req.question)
+        return {"answer": ans, "sources": []}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
