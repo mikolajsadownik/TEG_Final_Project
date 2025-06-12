@@ -1,17 +1,10 @@
-import os
-from openai import OpenAI
-import sys
 import json
-from ai_errors import BadAiApiRes, BadUserPrompt, AiAgentError
-import ai_prompts as aiP
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
+from ai_service.ai_errors import BadAiApiRes, BadUserPrompt, AiAgentError
+import ai_service.ai_prompts as aiP
 from services.query_pinecone_with_gpt import query_pinecone_via_namespace, generate_response,query_pinecone
 import json
-import re
-import pandas as pd
-import numpy as np
-from basemodel import BaseModel
+
+from ai_service.basemodel import BaseModel
 
 #model który pierwszy dostaje wiadmości i ją przetwarza
 

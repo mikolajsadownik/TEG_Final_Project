@@ -6,7 +6,7 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 from openai import OpenAI
 import os
-import ai_prompts as aiP
+import ai_service.ai_prompts as aiP
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 print(os.getcwd())

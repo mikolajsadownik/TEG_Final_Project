@@ -1,22 +1,13 @@
-import pandas as pd
 
-from keywordmaker import KeyWordMaker
-import numpy as np
-from textresiver import TextResiver
-from actsjson_service import json_context
-import sys
+from ai_service.keywordmaker import KeyWordMaker
+from ai_service.textresiver import TextResiver
+from ai_service.actsjson_service import json_context
 import os
-from ai_errors import  AiAgentError
-
+from ai_service.ai_errors import  AiAgentError
+from src.services.query_pinecone_with_gpt import query_pinecone_via_namespace, generate_response,query_pinecone
 sciezka_pliku = os.path.abspath(__file__)
 folder_pliku = os.path.dirname(sciezka_pliku)
 keywords=f"{folder_pliku}/data/key_words.json"
-
-
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from services.query_pinecone_with_gpt import query_pinecone_via_namespace, generate_response,query_pinecone
 
 
 

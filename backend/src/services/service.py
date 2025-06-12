@@ -1,4 +1,4 @@
-from config.config_manager import ConfigManager
+from src.config.config_manager import ConfigManager
 
 def run_backend_service():
     config = ConfigManager()

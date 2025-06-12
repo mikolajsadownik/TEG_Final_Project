@@ -1,17 +1,9 @@
-import os
-from openai import OpenAI
-import sys
 import json
-from ai_errors import BadAiApiRes, BadUserPrompt, AiAgentError
-import ai_prompts as aiP
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from services.query_pinecone_with_gpt import query_pinecone, generate_response
-import json
+import ai_service.ai_prompts as aiP
 import re
 import pandas as pd
 import numpy as np
-from basemodel import BaseModel
+from ai_service.basemodel import BaseModel
 
 
 # model do wytworzenia i sprawdzenia czy wytworzone słowa klucz są odpowiednie
