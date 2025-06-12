@@ -134,3 +134,23 @@ def prompt_cheack(title,prompt):
     masz zwrócić tylko **True** lub **False**
     """
     return system_prompt
+
+def prompt_merger(prompt,ans):
+    system_prompt =f"""
+    Zadanie:
+    Na podstawie poniższego pytania oraz zestawu odpowiedzi, wykonaj następujące kroki:
+    1. Zidentyfikuj tylko te odpowiedzi, które jednoznacznie i bezpośrednio odpowiadają na pytanie.
+    2. Odrzuć odpowiedzi niejednoznaczne, warunkowe, rozwlekłe lub nieudzielające jasnej odpowiedzi.
+    3. Zmerguj wybrane odpowiedzi w jedną klarowną, zwartą wypowiedź, zachowując sens oryginalnych odpowiedzi.
+    Pytanie użytkownika:
+    ***
+    {prompt}
+    ***
+    
+    Lista odpowiedzi:
+    ***
+    {ans}
+    ***
+
+        """
+    return system_prompt
