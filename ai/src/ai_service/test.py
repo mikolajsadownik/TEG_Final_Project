@@ -1,52 +1,54 @@
+import os
+import sys
+import json
 import pandas as pd
 
+# 🔧 Dodaj katalog "src" (tam, gdzie jest folder services/) do sys.path
+src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if src_path not in sys.path:
+    sys.path.insert(0, src_path)
+
+# 📥 Importy po dołączeniu src/ do ścieżki
 from keywordmaker import KeyWordMaker
-import numpy as np
 from textresiver import TextResiver
 from actsjson_service import json_context
-import sys
-import os
-from ai_errors import  AiAgentError
+from ai_errors import AiAgentError
+from services.query_pinecone_with_gpt import generate_response
 
+# 🔍 Ustawienia ścieżek
 sciezka_pliku = os.path.abspath(__file__)
 folder_pliku = os.path.dirname(sciezka_pliku)
-keywords=f"{folder_pliku}/data/key_words.json"
+keywords_path = os.path.join(folder_pliku, "data", "key_words.json")
+pytania_path = os.path.join(folder_pliku, "pytania.txt")
 
+# ⚙️ Inicjalizacja
+kwm = KeyWordMaker(key_words_path=keywords_path)
+tr = TextResiver()
 
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from services.query_pinecone_with_gpt import query_pinecone_via_namespace, generate_response,query_pinecone
-
-
-
-kwm=KeyWordMaker(keywords)
-# Dopasuj najbardziej podobne zestawy (np. top 3)
-tr=TextResiver()
-pytanie="Co grozi za zabójstwo z szczetgólnym okrucieśtwioe"
-with open(f"{folder_pliku}\pytania.txt", "r", encoding="utf-8") as file:
+# 📄 Wczytaj pytania z pliku
+with open(pytania_path, "r", encoding="utf-8") as file:
     questions = [line.strip() for line in file.readlines()]
-    print(questions) 
-    for q in questions:
-        try:
-            ans,ref_prompt=tr.check_pinecone_context(q)
-        except AiAgentError as e:
-            print(e.args[0])
-        for a in ans:
-            print("------\n")
-            print(a["code"])
-            print(a["ans"])
+    print(f"📘 Wczytano {len(questions)} pytań.")
 
-        keywords = kwm.create_keywords_from_prompt(ref_prompt)
-        odp=json_context(ref_prompt,keywords)
+# 🔁 Przetwarzanie każdego pytania
+for q in questions:
+    print(f"\n📥 Pytanie: {q}")
+    try:
+        odpowiedzi, ref_prompt = tr.check_pinecone_context(q)
+    except AiAgentError as e:
+        print(f"❌ Błąd AI: {e.args[0]}")
+        continue
 
-        if len(odp)>0:
-            print("CUHKJFAGSGHASHUHGBAUISNFDJKABGIAJKGBHJIASBGNJASNGJKLNSAJKLGNUIOAW")
-            response = generate_response(odp[0]["text"], ref_prompt)
-            print(response)
-            print("CUHKJFAGSGHASHUHGBAUISNFDJKABGIAJKGBHJIASBGNJASNGJKLNSAJKLGNUIOAW")
-            
-# with open(r"C:\Users\jarja\Desktop\Studia\teg\TEG_Final_Project\MOJtest\acts_backup.json", "r", encoding="utf-8") as f:
-#     data = [json.loads(line) for line in f]
+    print("🔎 Odpowiedzi z Pinecone:")
+    for a in odpowiedzi:
+        print(f"\n🔸 Kodeks: {a['code']}\n{a['ans']}")
 
-# print(data["displayAddress"])
+    keywords = kwm.create_keywords_from_prompt(ref_prompt)
+    dopasowania = json_context(ref_prompt, keywords)
+
+    if dopasowania:
+        print("\n🧠 Odpowiedź na podstawie embeddingów:")
+        odpowiedz_embedding = generate_response(dopasowania[0]["text"], ref_prompt)
+        print(odpowiedz_embedding)
+    else:
+        print("\n⚠️ Brak trafnych dopasowań w dokumentach.")

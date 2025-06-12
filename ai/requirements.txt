@@ -5,3 +5,4 @@ pdfplumber
 sentence_transformers
 openai
 langchain
+langchain-community

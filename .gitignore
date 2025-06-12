@@ -7,3 +7,6 @@ data/
 acts_backup.json
 MOJtest/
 *.json
+ai/src/ai_service/pobrane_pdf/
+kodeksy_prawne/
+ai/src/ai_service/pobrane_pdf/plik.pdf

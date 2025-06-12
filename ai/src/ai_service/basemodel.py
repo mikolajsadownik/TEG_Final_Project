@@ -1,15 +1,20 @@
-from openai import OpenAI
+from langchain_community.chat_models import ChatOpenAI
+from langchain.callbacks import LangChainTracer
+from langchain.schema import HumanMessage, SystemMessage
+
 import os
 
 
 class BaseModel:
-
-
-    #Abstrakcyjna klasa dla modeli
-
     def __init__(self, name, model):
-        self.name=name
-        self.model=model
-        self.client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-        self.promptMemory=[]
+        self.name = name
+        self.model_name = model
+        self.tracer = LangChainTracer()
+        self.client = ChatOpenAI(
+            model_name=model,
+            temperature=0,
+            callbacks=[self.tracer],
+        )
+        self.promptMemory = []
+
 
