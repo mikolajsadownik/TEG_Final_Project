@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from services.query_pinecone_with_gpt import query_pinecone, generate_response
-from src.ai_service.manger import MergerAI
+from src.ai_service.manager import MergerAI
 app = FastAPI(title="TEG AI Service")
 mai=mai=MergerAI()
 class AskRequest(BaseModel):

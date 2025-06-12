@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 
 load_dotenv()
-BACKEND_URL: str = os.getenv("BACKEND_URL", "http://localhost:8000")
+BACKEND_URL: str = os.getenv("BACKEND_URL", "http://backend:8000")
 SESSION = requests.Session()
 LOGGER = logging.getLogger(__name__)
 

@@ -4,7 +4,7 @@ from ai_service.keywordmaker import KeyWordMaker
 from ai_service.textresiver import TextResiver
 from ai_service.actsjson_service import json_context
 import os
-from ai_service.ai_errors import  AiAgentError
+from ai_service.ai_errors import  AiAgentError, BadUserPrompt
 from src.services.query_pinecone_with_gpt import  generate_response
 import ai_service.ai_prompts as aiP
 from ai_service.basemodel import BaseModel
@@ -22,13 +22,13 @@ class MergerAI(BaseModel):
         allodp=[]
         try:
             ans,ref_prompt=self.tr.check_pinecone_context(prompt)
-        except AiAgentError as e:
-            print(e.args[0])
+        except BadUserPrompt as e:
+            return["ERROR: Bledne pytanie"]
         for a in ans:
             allodp.append(a["ans"])
-            #     print("------\n")
-            #     print(a["code"])
-            #     print(a["ans"])
+            print("------\n")
+            print(a["code"])
+            print(a["ans"])
 
         keywords = self.kwm.create_keywords_from_prompt(ref_prompt)
         odp=json_context(ref_prompt,keywords)

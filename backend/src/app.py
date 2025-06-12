@@ -13,10 +13,14 @@ class Ask(BaseModel):
 @app.post("/ask")
 async def ask(req: Ask):
     try:
-        r = requests.post(f"{AI_URL}/ask", json=req.model_dump(), timeout=90)
+        r = requests.post(f"{AI_URL}/ask", json=req.model_dump(), timeout=300)
         r.raise_for_status()
         return r.json()
     except requests.HTTPError as exc:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=r.status_code, detail=r.text) from exc
     except Exception as exc:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(exc)) from exc
