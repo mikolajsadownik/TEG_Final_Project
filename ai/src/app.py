@@ -10,9 +10,13 @@ class AskRequest(BaseModel):
 @app.post("/ask")
 async def ask(req: AskRequest):
     try:
+        """
+       
+        """
         ctx  = query_pinecone(req.question)
-        ans  = generate_response(ctx, req.question)
-        return {"answer": ans, "sources": []}
+        ans  = generate_response(ctx, req.question) # TUTAJ MA SIE ZWRACAC ODPOWIEDZ OD AI jako ans 
+        src = [] #tutaj src do odpowiedzi - konkertne pliki/ paragrafy cokolwiek co uwazacie
+        return {"answer": ans, "sources": src} 
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 
