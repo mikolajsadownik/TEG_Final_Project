@@ -23,16 +23,25 @@ class MergerAI(BaseModel):
         try:
             ans,ref_prompt=self.tr.check_pinecone_context(prompt)
         except BadUserPrompt as e:
-            return["ERROR: Bledne pytanie"]
+            return["ERROR - Bledne zapytanie uzytkownika"]
         for a in ans:
             allodp.append(a["ans"])
             print("------\n")
             print(a["code"])
             print(a["ans"])
+        system_prompt= aiP.prompt_cheack_if_enough(prompt,allodp)
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=[{"role": "system", "content": system_prompt}])
 
+        
+        print("======================================================")
+        res = response.choices[0].message.content.strip()
+        print(res)
+        if res=="True":
+            return allodp
         keywords = self.kwm.create_keywords_from_prompt(ref_prompt)
         odp=json_context(ref_prompt,keywords)
-
         if len(odp)>0:
             response = generate_response(odp[0]["text"], ref_prompt)
             allodp.append(response)

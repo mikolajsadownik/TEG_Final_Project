@@ -154,3 +154,27 @@ def prompt_merger(prompt,ans):
 
         """
     return system_prompt
+
+def prompt_cheack_if_enough(prompt, ans):
+    system_prompt=f"""
+   
+    Jesteś asystentem prawnym, który analizuje odpowiedzi wygenerowane na podstawie dokumentów prawnych.
+
+    Twoim zadaniem jest:
+    1. Ocenić, czy w podanym fragmencie tekstu (kontekście) znajduje się **jakakolwiek sensowna, merytoryczna odpowiedź** na pytanie użytkownika.
+    2. Jeśli w treści **nie ma odpowiedzi lub jest ona bardzo ogólna, nie związana z pytaniem**, odpowiedz:
+    - `false` (małymi literami) i podaj krótki komunikat w stylu:
+    - "Na podstawie dostarczonego kontekstu nie znaleziono odpowiedzi na to pytanie."
+    - "Nie ma informacji w podanym kontekście, która pozwalałaby odpowiedzieć na pytanie użytkownika."
+
+    3. Jeśli **jakakolwiek część kontekstu wskazuje konkretną informację**, przepis, fragment prawa, który może być odpowiedzią na pytanie – odpowiedz:
+    - `True` (z dużej litery T) i nic więcej.
+
+    Zwróć wyłącznie: `True` lub `False`. Bez dodatkowych komentarzy. Nie tłumacz niczego.
+
+    **Pytanie użytkownika:** {prompt}
+
+    **Kontekst:** {ans}
+    """
+    return system_prompt
+

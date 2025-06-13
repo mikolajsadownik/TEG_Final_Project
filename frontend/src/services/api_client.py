@@ -22,6 +22,6 @@ def ask_question(question: str) -> Dict[str, Any]:
     payload = {"question": question}
     LOGGER.debug("POST %s payload=%s", url, payload)
 
-    resp = SESSION.post(url, json=payload, timeout=120)
+    resp = SESSION.post(url, json=payload, timeout=600)
     resp.raise_for_status()
     return resp.json()  # chce miec: {"answer": "...", "sources": [...]}
