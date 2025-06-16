@@ -14,7 +14,7 @@ folder_pliku = os.path.dirname(sciezka_pliku)
 keywords=f"{folder_pliku}/data/key_words.json"
 class MergerAI(BaseModel):
 
-    def __init__(self, ai_model="gpt-3.5-turbo"):
+    def __init__(self, ai_model="gpt-4-turbo"):
         super().__init__(name="MergerAI", model=ai_model)
         self.tr=TextResiver()
         self.kwm=KeyWordMaker(keywords)
