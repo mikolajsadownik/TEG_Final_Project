@@ -134,3 +134,47 @@ def prompt_cheack(title,prompt):
     masz zwrócić tylko **True** lub **False**
     """
     return system_prompt
+
+def prompt_merger(prompt,ans):
+    system_prompt =f"""
+    Zadanie:
+    Na podstawie poniższego pytania oraz zestawu odpowiedzi, wykonaj następujące kroki:
+    1. Zidentyfikuj tylko te odpowiedzi, które jednoznacznie i bezpośrednio odpowiadają na pytanie.
+    2. Odrzuć odpowiedzi niejednoznaczne, warunkowe, rozwlekłe lub nieudzielające jasnej odpowiedzi.
+    3. Zmerguj wybrane odpowiedzi w jedną klarowną, zwartą wypowiedź, zachowując sens oryginalnych odpowiedzi.
+    Pytanie użytkownika:
+    ***
+    {prompt}
+    ***
+    
+    Lista odpowiedzi:
+    ***
+    {ans}
+    ***
+
+        """
+    return system_prompt
+
+def prompt_cheack_if_enough(prompt, ans):
+    system_prompt=f"""
+   
+    Jesteś asystentem prawnym, który analizuje odpowiedzi wygenerowane na podstawie dokumentów prawnych.
+
+    Twoim zadaniem jest:
+    1. Ocenić, czy w podanym fragmencie tekstu (kontekście) znajduje się **jakakolwiek sensowna, merytoryczna odpowiedź** na pytanie użytkownika.
+    2. Jeśli w treści **nie ma odpowiedzi lub jest ona bardzo ogólna, nie związana z pytaniem**, odpowiedz:
+    - `false` (małymi literami) i podaj krótki komunikat w stylu:
+    - "Na podstawie dostarczonego kontekstu nie znaleziono odpowiedzi na to pytanie."
+    - "Nie ma informacji w podanym kontekście, która pozwalałaby odpowiedzieć na pytanie użytkownika."
+
+    3. Jeśli **jakakolwiek część kontekstu wskazuje konkretną informację**, przepis, fragment prawa, który może być odpowiedzią na pytanie – odpowiedz:
+    - `True` (z dużej litery T) i nic więcej.
+
+    Zwróć wyłącznie: `True` lub `False`. Bez dodatkowych komentarzy. Nie tłumacz niczego.
+
+    **Pytanie użytkownika:** {prompt}
+
+    **Kontekst:** {ans}
+    """
+    return system_prompt
+

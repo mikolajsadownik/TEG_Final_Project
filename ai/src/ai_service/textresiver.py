@@ -10,7 +10,7 @@ from ai_service.basemodel import BaseModel
 
 class TextResiver(BaseModel):
         
-    def __init__(self, ai_model="gpt-3.5-turbo"):
+    def __init__(self, ai_model="gpt-4-turbo"):
         super().__init__(name="TextReceiver", model=ai_model)
         self.CODE_MAP = {
         "Kodeks cywilny": "kodeks_cywilny",

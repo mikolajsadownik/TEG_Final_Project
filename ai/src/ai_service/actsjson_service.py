@@ -8,6 +8,7 @@ from openai import OpenAI
 import os
 import ai_service.ai_prompts as aiP
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from dotenv import load_dotenv
 
 print(os.getcwd())
 load_dotenv()
@@ -40,7 +41,7 @@ def check_title(title,prompt,client=client):
     system_prompt = aiP.prompt_cheack(title,prompt)
                 
     response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4-turbo",
             messages=[{"role": "system", "content": system_prompt}])
     return response.choices[0].message.content
 
@@ -49,7 +50,8 @@ def get_valid_pdf_paths(dataFrame_titles,prompt):
     for i, row in dataFrame_titles.iterrows():
         t=check_title(row["title"],prompt)
         if t=="True":
-            path=f"https://isap.sejm.gov.pl/isap.nsf/download.xsp/{row["address"]}/{row["typeFile"]}/{row["fileNames"]}"
+            path = f"https://isap.sejm.gov.pl/isap.nsf/download.xsp/{row['address']}/{row['typeFile']}/{row['fileNames']}"
+            print(path) #usuń
             base, ext = os.path.splitext(path)
             if ext.lower() == ".doc":
                 path = base + ".pdf"
@@ -111,7 +113,7 @@ def batch_valid_json(prompt,prompt_keywords):
         embeded_chunks.append(embeded_chunk)
     return embeded_chunks,chunks
 
-def search_similar_pdf(prompt,batch_chunks,text_chunks,eb_model=model,top_k=5):
+def search_similar_pdf(prompt,batch_chunks,text_chunks,eb_model=model,top_k=2):
     question_embedding = eb_model.encode([prompt])[0]
     question=[question_embedding]
     similarities = cosine_similarity(question, batch_chunks)[0]

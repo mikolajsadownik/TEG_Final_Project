@@ -1,9 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from services.query_pinecone_with_gpt import query_pinecone, generate_response
-
+from src.ai_service.merger import MergerAI
 app = FastAPI(title="TEG AI Service")
-
+mai=mai=MergerAI()
 class AskRequest(BaseModel):
     question: str
 
@@ -13,8 +13,7 @@ async def ask(req: AskRequest):
         """
        
         """
-        ctx  = query_pinecone(req.question)
-        ans  = generate_response(ctx, req.question) # TUTAJ MA SIE ZWRACAC ODPOWIEDZ OD AI jako ans 
+        ans=mai.merge_ans(req)# TUTAJ MA SIE ZWRACAC ODPOWIEDZ OD AI jako ans 
         src = [] #tutaj src do odpowiedzi - konkertne pliki/ paragrafy cokolwiek co uwazacie
         return {"answer": ans, "sources": src} 
     except Exception as exc:

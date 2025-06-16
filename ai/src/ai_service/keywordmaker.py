@@ -11,9 +11,9 @@ from ai_service.basemodel import BaseModel
 class KeyWordMaker(BaseModel):
 
        
-    def __init__(self, key_words_path, ai_model="gpt-3.5-turbo"):
+    def __init__(self, key_words_path, ai_model="gpt-4-turbo"):
         super().__init__(name="KeyWordMaker", model=ai_model)
-        self.keywords = np.array(pd.read_json(key_words_path)[0])
+        self.keywords = np.array(pd.read_json(key_words_path, encoding="cp1250")[0])
         pass
 
     
@@ -28,7 +28,7 @@ class KeyWordMaker(BaseModel):
             system_prompt = "Jesteś prawnikiem specjalizującym sie w doborze słów kluczowych pod daną sytuacje"
             user_message = aiP.prompt_create_key_words_from_querry(batch=batch,prompt=prompt)
             response = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4-turbo	",
                 messages=[{"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_message}]
                
@@ -61,7 +61,7 @@ class KeyWordMaker(BaseModel):
             return None
 
 
-    def evaluate_keywords_against_query(self,prompt, keywords, model="gpt-3.5-turbo"):
+    def evaluate_keywords_against_query(self,prompt, keywords, model="gpt-4-turbo"):
         keywords_json = json.dumps(keywords, ensure_ascii=False)
 
         system_message = "Jesteś specjalistą od prawa i regulacji. Twoim zadaniem jest ocena, czy dane słowo kluczowe może mieć zastosowanie w kontekście przepisów prawa (karnego, administracyjnego, sanitarnego itp.) względem danego zapytania – nawet jeśli zapytanie jest nietypowe."
